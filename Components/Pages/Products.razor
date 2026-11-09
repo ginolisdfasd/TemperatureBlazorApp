@@ -1,0 +1,95 @@
+﻿@page "/products"
+@rendermode InteractiveServer
+@using TemperatureBlazorApp.Models
+@using TemperatureBlazorApp.Services
+@inject AppDataService DataService
+
+<div class="container mt-4">
+    <h2 class="mb-3">📦 Склад товаров (Паттерн REPR в SPA)</h2>
+    <p class="text-muted">Изолированные DTO-объекты для входящего Request и исходящего Response без перезагрузки страниц.</p>
+
+    <div class="row mt-4">
+        <!-- Вывод списка товаров -->
+        <div class="col-md-8 mb-4">
+            <table class="table table-bordered table-hover shadow-sm bg-white">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Название товара</th>
+                        <th>Цена ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var prod in productsList)
+                    {
+                        <tr>
+                            <td>@prod.Id</td>
+                            <td class="fw-bold">@prod.Name</td>
+                            <td>@prod.Price.ToString("F2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Ввод данных (Request) и Фиксация Результата (Response) -->
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm border-primary">
+                <h5 class="card-title text-primary mb-3">Создать товар (Request)</h5>
+                
+                <div class="mb-2">
+                    <label class="form-label small">Название товара:</label>
+                    <input type="text" class="form-control" @bind="productRequest.Name" placeholder="Напр. Апельсин" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small">Цена:</label>
+                    <input type="number" class="form-control" @bind="productRequest.Price" step="0.01" />
+                </div>
+
+                <button class="btn btn-primary w-100" @onclick="SendReprRequest">Отправить Request</button>
+
+                @if (productResponse != null)
+                {
+                    <div class="alert alert-info mt-3 small mb-0">
+                        <strong>Response от сервера:</strong><br />
+                        Статус-код операции: @productResponse.StatusCode <br />
+                        Успешно сохранен ID: @productResponse.Product.Id
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Product> productsList = new();
+    
+    // Входной DTO (Request)
+    private CreateProductRequest productRequest = new();
+    
+    // Выходной DTO (Response)
+    private CreateProductResponse? productResponse;
+
+    protected override void OnInitialized()
+    {
+        UpdateProductsTable();
+    }
+
+    private void UpdateProductsTable()
+    {
+        productsList = DataService.GetProducts();
+    }
+
+    private void SendReprRequest()
+    {
+        if (string.IsNullOrWhiteSpace(productRequest.Name) || productRequest.Price <= 0) return;
+
+        // Передаем Request в сервис и получаем структурированный Response
+        productResponse = DataService.CreateProduct(productRequest);
+        
+        // Сбрасываем форму и обновляем интерактивную таблицу
+        productRequest = new();
+        UpdateProductsTable();
+    }
+}

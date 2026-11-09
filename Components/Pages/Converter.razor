@@ -1,0 +1,66 @@
+﻿@page "/converter"
+@rendermode InteractiveServer
+@using TemperatureBlazorApp.Models
+@using TemperatureBlazorApp.Services
+@inject TemperatureService TempService
+
+<div class="container mt-4">
+    <h2 class="mb-3">🌡️ Вариант 19: Конвертер температур</h2>
+    
+    <div class="card p-3 my-3 shadow-sm" style="max-width: 400px;">
+        <div class="mb-3">
+            <label class="form-label">Значение температуры:</label>
+            <input type="number" class="form-control" @bind="inputValue" step="0.01" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Исходная шкала:</label>
+            <select class="form-select" @bind="selectedScale">
+                <option value="@TemperatureScale.Celsius">Цельсий (°C)</option>
+                <option value="@TemperatureScale.Fahrenheit">Фаренгейт (°F)</option>
+                <option value="@TemperatureScale.Kelvin">Кельвин (K)</option>
+            </select>
+        </div>
+        <button class="btn btn-primary w-100" @onclick="ExecuteConversion">Конвертировать</button>
+        
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger mt-3 mb-0">@error</div>
+        }
+    </div>
+
+    @if (result != null)
+    {
+        <div class="row" style="max-width: 500px;">
+            <div class="col border p-3 m-1 bg-light text-center rounded shadow-sm">
+                <h6 class="text-muted">Цельсий</h6>
+                <h3 class="fw-bold text-primary">@result.Celsius °C</h3>
+            </div>
+            <div class="col border p-3 m-1 bg-light text-center rounded shadow-sm">
+                <h6 class="text-muted">Фаренгейт</h6>
+                <h3 class="fw-bold text-success">@result.Fahrenheit °F</h3>
+            </div>
+            <div class="col border p-3 m-1 bg-light text-center rounded shadow-sm">
+                <h6 class="text-muted">Кельвин</h6>
+                <h3 class="fw-bold text-warning">@result.Kelvin K</h3>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private double inputValue = 25;
+    private TemperatureScale selectedScale = TemperatureScale.Celsius;
+    private TemperatureResult? result;
+    private string error = "";
+
+    private void ExecuteConversion()
+    {
+        try {
+            error = "";
+            result = TempService.Convert(inputValue, selectedScale);
+        } catch (Exception ex) {
+            result = null;
+            error = ex.Message;
+        }
+    }
+}

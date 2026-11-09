@@ -1,0 +1,27 @@
+﻿<div class="top-row ps-3 navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Лабораторная №8</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu toggle" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column nav-pills p-3">
+        <div class="nav-item mb-2">
+            <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="converter">
+                <span>🌡️</span> Конвертер температур
+            </NavLink>
+        </div>
+        <div class="nav-item mb-2">
+            <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="students">
+                <span>👥</span> Список студентов
+            </NavLink>
+        </div>
+        <div class="nav-item mb-2">
+            <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="products">
+                <span>📦</span> Склад товаров (REPR)
+            </NavLink>
+        </div>
+    </nav>
+</div>

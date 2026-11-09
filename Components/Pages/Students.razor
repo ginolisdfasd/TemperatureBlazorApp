@@ -1,0 +1,105 @@
+﻿@page "/students"
+@rendermode InteractiveServer
+@using TemperatureBlazorApp.Models
+@using TemperatureBlazorApp.Services
+@inject AppDataService DataService
+
+<div class="container mt-4">
+    <h2 class="mb-3">👥 Управление студентами (Группа БИСТ-24-ПО-3)</h2>
+    <p class="text-muted">Интерактивное добавление и удаление записей в реальном времени с использованием архитектуры Blazor SPA.</p>
+
+    <div class="row mt-4">
+        <!-- Таблица списка студентов -->
+        <div class="col-md-8 mb-4">
+            <table class="table table-striped table-hover border shadow-sm bg-white">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>ФИО Студента</th>
+                        <th>Возраст</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in studentList)
+                    {
+                        <tr>
+                            <td>@student.Id</td>
+                            <td>@student.Name</td>
+                            <td>@student.Age</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" @onclick="() => RemoveStudent(student.Id)">
+                                    Удалить
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Форма добавления нового студента -->
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm border-success">
+                <h5 class="card-title text-success mb-3">Новый студент</h5>
+                
+                <div class="mb-2">
+                    <label class="form-label small">Имя / ФИО:</label>
+                    <input type="text" class="form-control" @bind="newName" placeholder="Напр. Анна Иванова" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small">Возраст:</label>
+                    <input type="number" class="form-control" @bind="newAge" />
+                </div>
+
+                <button class="btn btn-success w-100" @onclick="AddStudent">Добавить в список</button>
+                
+                @if (!string.IsNullOrEmpty(validationError))
+                {
+                    <div class="text-danger small mt-2">@validationError</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Student> studentList = new();
+    private string newName = "";
+    private int newAge = 20;
+    private string validationError = "";
+
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+
+    private void LoadData()
+    {
+        studentList = DataService.GetStudents();
+    }
+
+    private void AddStudent()
+    {
+        if (string.IsNullOrWhiteSpace(newName) || newAge <= 0)
+        {
+            validationError = "Заполните корректно все поля!";
+            return;
+        }
+
+        validationError = "";
+        DataService.AddStudent(new Student { Name = newName, Age = newAge });
+        
+        // Очистка формы и мгновенный апдейт UI
+        newName = "";
+        newAge = 20;
+        LoadData();
+    }
+
+    private void RemoveStudent(int id)
+    {
+        DataService.DeleteStudent(id);
+        LoadData(); // Таблица мгновенно перерисуется
+    }
+}
